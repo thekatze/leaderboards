@@ -1,0 +1,5 @@
+/target
+leaderboards.db
+
+/node_modules
+styles_generated.css

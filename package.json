@@ -1,0 +1,16 @@
+{
+  "name": "leaderboards",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently --kill-others npm:dev:*",
+    "dev:styles": "tailwindcss -i ./src/routes/styles.css -o ./src/routes/styles_generated.css --watch",
+    "dev:rust": "LEADERBOARDS_DB_FILE=\"./leaderboards.db\" LEADERBOARDS_ADDRESS=\"127.0.0.1:8080\" cargo watch -x run",
+    "build": "npm run build:styles && npm run build:rust",
+    "build:styles": "tailwindcss -i ./src/routes/styles.css -o ./src/routes/styles_generated.css --minify",
+    "build:rust": "cargo build --release"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "tailwindcss": "^3.4.3"
+  }
+}
