@@ -22,6 +22,10 @@ pub(crate) async fn handle_add(
     State(context): State<AppContext>,
     Form(form): Form<AddHighscoreForm>,
 ) -> Result<impl IntoResponse, StatusCode> {
+    if form.username.len() > 16 {
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
     let leaderboard_id = Uuid::try_parse(&leaderboard_id).map_err(|_| StatusCode::BAD_REQUEST)?;
     let leaderboard = query_as::<_, Leaderboard>("SELECT * FROM leaderboards WHERE id = ?1")
         .bind(leaderboard_id)
