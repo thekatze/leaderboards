@@ -8,6 +8,7 @@ pub(crate) struct Leaderboard {
 
 pub(crate) struct HighScores {
     pub(crate) high_scores: Box<[HighScore]>,
+    pub(crate) editable: bool,
 }
 
 #[derive(sqlx::FromRow)]

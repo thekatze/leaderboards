@@ -47,3 +47,27 @@ pub(crate) async fn handle_add(
 
     Ok(Redirect::to(&format!("/{}", leaderboard.id)))
 }
+
+#[derive(Deserialize)]
+pub(crate) struct DeletePath {
+    leaderboard_id: String,
+    highscore_id: String,
+}
+
+pub(crate) async fn handle_delete(
+    Path(path): Path<DeletePath>,
+    State(context): State<AppContext>,
+) -> Result<impl IntoResponse, StatusCode> {
+    let leaderboard_id =
+        Uuid::try_parse(&path.leaderboard_id).map_err(|_| StatusCode::BAD_REQUEST)?;
+    let highscore_id = Uuid::try_parse(&path.highscore_id).map_err(|_| StatusCode::BAD_REQUEST)?;
+
+    query("DELETE FROM highscores where leaderboard_id = ?1 AND id = ?2")
+        .bind(leaderboard_id)
+        .bind(highscore_id)
+        .execute(&context.db)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    Ok(StatusCode::NO_CONTENT)
+}

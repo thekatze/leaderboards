@@ -45,23 +45,25 @@ async fn get_leaderboard_and_high_scores(
 }
 
 #[derive(Deserialize)]
-pub(crate) struct Limits {
+pub(crate) struct IndexQueryParams {
     limit: Option<i64>,
+    edit: Option<bool>, // TODO: edittoken that gets handed to creator
 }
 
 pub(crate) async fn render(
     Path(leaderboard_id): Path<String>,
     State(context): State<AppContext>,
-    Query(limits): Query<Limits>,
+    Query(query): Query<IndexQueryParams>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let leaderboard_id = Uuid::try_parse(&leaderboard_id).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let (leaderboard, highscores) =
-        get_leaderboard_and_high_scores(&leaderboard_id, &context, limits.limit.unwrap_or(20))
+        get_leaderboard_and_high_scores(&leaderboard_id, &context, query.limit.unwrap_or(20))
             .await?;
 
     let high_scores = HighScores {
         high_scores: highscores.into_boxed_slice(),
+        editable: query.edit.unwrap_or(false),
     };
 
     Ok(layout(html!(
@@ -88,10 +90,15 @@ pub(crate) struct GetJsonResponse {
     scores: Vec<GetJsonResponseHighscore>,
 }
 
+#[derive(Deserialize)]
+pub(crate) struct GetJsonQueryParams {
+    limit: Option<i64>,
+}
+
 pub(crate) async fn get_json(
     Path(leaderboard_id): Path<String>,
     State(context): State<AppContext>,
-    Query(limits): Query<Limits>,
+    Query(limits): Query<GetJsonQueryParams>,
 ) -> Result<impl IntoResponse, StatusCode> {
     let leaderboard_id = Uuid::try_parse(&leaderboard_id).map_err(|_| StatusCode::BAD_REQUEST)?;
 
@@ -129,3 +136,4 @@ pub(crate) async fn handle_new(
 
     Ok(Redirect::to(&id.to_string()))
 }
+

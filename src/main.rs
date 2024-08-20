@@ -2,7 +2,7 @@ use std::env;
 
 use axum::{
     http::StatusCode,
-    routing::{get, post},
+    routing::{delete, get, post},
     Router,
 };
 use sqlx::{migrate, sqlite::SqliteConnectOptions, SqlitePool};
@@ -57,8 +57,12 @@ fn build_app(db: SqlitePool) -> Router {
         .route("/", get(routes::index::render))
         .route("/favicon.ico", get(StatusCode::NOT_FOUND))
         .route("/new", post(routes::leaderboard::handle_new))
-        .route("/:leaderboard", get(routes::leaderboard::render))
-        .route("/:leaderboard/add", post(routes::highscores::handle_add))
-        .route("/:leaderboard/json", get(routes::leaderboard::get_json))
+        .route("/:leaderboard_id", get(routes::leaderboard::render))
+        .route("/:leaderboard_id/add", post(routes::highscores::handle_add))
+        .route("/:leaderboard_id/json", get(routes::leaderboard::get_json))
+        .route(
+            "/:leaderboard_id/:highscore_id",
+            delete(routes::highscores::handle_delete),
+        )
         .with_state(context)
 }
